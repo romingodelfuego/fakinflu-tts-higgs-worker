@@ -1,0 +1,16 @@
+{
+  "name": "tts-higgs",
+  "repo": "romingodelfuego/fakinflu-tts-higgs-worker",
+  "visibility": "private",
+  "description": "fakinflu RunPod serverless worker: tts-higgs (org/model)",
+  "endpoint": {
+    "name": "romingodelfuego/fakinflu-tts-higgs-worker",
+    "env_var": "RUNPOD_TTS_HIGGS_ENDPOINT_ID",
+    "gpu_pools": ["AMPERE_24"],
+    "workers": {"min": 0, "max": 2, "idleTimeout": 5},
+    "timeout_ms": 600000,
+    "flashboot": "FLASHBOOT",
+    "disk_gb": 40,
+    "env": {}
+  }
+}
