@@ -2,15 +2,25 @@
   "name": "tts-higgs",
   "repo": "romingodelfuego/fakinflu-tts-higgs-worker",
   "visibility": "private",
-  "description": "fakinflu RunPod serverless worker: tts-higgs (org/model)",
+  "description": "fakinflu RunPod serverless worker: Higgs TTS 3 (Boson AI, vLLM-Omni, poids bakes) - texte balise (emotion, style, pauses, rires) -> wav, clonage de voix optionnel",
   "endpoint": {
-    "name": "romingodelfuego/fakinflu-tts-higgs-worker",
+    "name": "fakinflu-tts-higgs-worker",
     "env_var": "RUNPOD_TTS_HIGGS_ENDPOINT_ID",
-    "gpu_pools": ["AMPERE_24"],
-    "workers": {"min": 0, "max": 2, "idleTimeout": 5},
-    "timeout_ms": 600000,
+    "gpu_pools": [
+      "AMPERE_48",
+      "ADA_48_PRO"
+    ],
+    "workers": {
+      "min": 0,
+      "max": 1,
+      "idleTimeout": 5
+    },
+    "timeout_ms": 1200000,
     "flashboot": "FLASHBOOT",
     "disk_gb": 40,
-    "env": {}
-  }
+    "min_cuda": "12.9",
+    "env": {},
+    "notes": "Image CUDA 12.9 : minCudaVersion 12.9 sur l'endpoint. vLLM-Omni reserve ~85 % de la VRAM (talker 60 % + codec 25 %) : 48 Go pour le premier test, 24 Go a essayer ensuite. Licence du modele : recherche/non commerciale + Creator Use Grant (crediter Boson AI's Higgs Audio)."
+  },
+  "version": "v1.0.0"
 }

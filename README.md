@@ -1,27 +1,44 @@
 # Worker RunPod : tts-higgs
 
-Modèle : `org/model`. Dépôt : https://github.com/romingodelfuego/fakinflu-tts-higgs-worker, monté en sous-module dans fakinflu.
-**La source fait foi ici** : les changements passent par des PR sur ce dépôt.
+**Higgs TTS 3** (Boson AI, ~4B, 100+ langues dont le français, 24 kHz) : synthèse expressive
+pilotée par **balises en ligne**, avec clonage de voix zero-shot. Servi en inférence hors ligne par
+[vLLM-Omni](https://github.com/vllm-project/vllm-omni) 0.30.0.
 
-## Cycle de vie (depuis fakinflu)
-
-```bash
-make worker-status W=tts-higgs                  # sous-module vs main vs dernière release (0 crédit)
-make worker-bump W=tts-higgs [BUMP=minor] PR=1  # VERSION + worker.json dans la PR
-# merge de la PR sur main = build RunPod (chaque push sur main reconstruit l'image)
-make worker-release W=tts-higgs NOTES="..."     # tag vX.Y.Z + GitHub Release, puis git add du sous-module
-```
-
-**Première release seulement** : il faut lier le dépôt dans la console RunPod
-(**Serverless → New Endpoint → Import Git Repository**). Appliquer ensuite les réglages
-de `worker.json` (GPU, workers, timeouts) et noter l'ID dans `.env` → `RUNPOD_TTS_HIGGS_ENDPOINT_ID`.
-Claude peut faire tout ça à ta place (skill `deploy-worker`).
+Pile séparée du worker `tts` (Chatterbox / Qwen / VoxCPM2) : vLLM, CUDA 12.9, ~85 % de la VRAM.
 
 ## Contrat d'API
 
+Identique au worker `tts`, moteur `higgs` :
+
 ```json
-{"input": {"items": [{"id": "a", "...": "..."}]}}
-→ {"results": [{"id": "a", "...": "..."}, {"id": "b", "error": "..."}]}
+{"input": {
+  "voices": {"fr_f": {"ref_audio": "<b64 wav>", "ref_text": "transcription exacte (améliore le clone)"}},
+  "items": [
+    {"id": "1", "text": "<|emotion:bitterness|><|prosody:speed_slow|>Tu m'as menti. <|prosody:pause|>Depuis le début.",
+     "voice": {"mode": "clone", "ref": "fr_f"}},
+    {"id": "2", "text": "<|style:whispering|>Ne fais pas de bruit.", "voice": {"mode": "default"}}
+  ]}}
+→ {"results": [{"id": "1", "audio": "<b64 wav>", "sr": 24000, "duration_s": 3.2, "seconds": 0.9, "model": "...", "engine": "higgs"}]}
 ```
 
-Test local du handler (sur une machine GPU) : `python handler.py --test_input "$(cat test_input.json)"`.
+## Balises
+
+| Où | Balises |
+|---|---|
+| En tête | `<\|emotion:X\|>` (elation, amusement, enthusiasm, determination, pride, contentment, affection, relief, contemplation, confusion, surprise, awe, longing, arousal, anger, fear, disgust, bitterness, sadness, shame, helplessness) · `<\|style:singing\|shouting\|whispering\|>` · `<\|prosody:speed_very_slow\|speed_slow\|speed_fast\|speed_very_fast\|>` · `<\|prosody:pitch_low\|pitch_high\|>` · `<\|prosody:expressive_high\|expressive_low\|>` |
+| À l'endroit voulu | `<\|prosody:pause\|>` (~0,5 s) · `<\|prosody:long_pause\|>` (~1 s) · `<\|sfx:X\|>` + onomatopée : cough, laughter (`Haha`), crying, screaming, burping, humming, sigh (`Pff`), sniff, sneeze |
+
+Pas de paramètre de langue. Les paramètres d'échantillonnage sont ceux de la config de
+déploiement vLLM-Omni (température 1.0, top_p 0.95, top_k 50, seed 42).
+
+## Licence
+
+Poids sous **Boson Higgs TTS 3 Research and Non-Commercial License**. La *Creator Use Grant*
+autorise les contenus monétisés (vidéos, podcasts, réseaux sociaux) à condition de créditer
+« Boson AI's Higgs Audio » de façon visible ; elle exclut l'exposition du modèle comme API ou
+service à des tiers. Ce worker sert au bench interne.
+
+## Cycle de vie
+
+Voir `make worker-status W=tts-higgs` / `make worker-bump` / `make worker-release` (racine fakinflu).
+Réglages de l'endpoint dans `worker.json` (dont `min_cuda` : 12.9).

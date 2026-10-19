@@ -1,1 +1,4 @@
-{"input": {"items": [{"id": "smoke", "prompt": "hello"}]}}
+{"input": {"items": [
+  {"id": "smoke_plain", "text": "Bonjour, ceci est un test.", "voice": {"mode": "default"}},
+  {"id": "smoke_tags", "text": "<|emotion:amusement|><|prosody:expressive_high|>Attends, attends, c'était vraiment drôle. <|sfx:laughter|>Haha, non, sérieux.", "voice": {"mode": "default"}}
+]}}
