@@ -14,9 +14,17 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
+# torch/torchaudio/torchvision de la base (+cu129) figes en contraintes : sans ca, l'installation
+# de vllm-omni remplace torch par la roue PyPI CUDA 13.0 et laisse torchaudio en 12.9 -> crash a
+# l'import ("PyTorch and TorchAudio were compiled with different CUDA versions", v1.0.0).
 ARG VLLM_OMNI_VERSION=0.30.0
-RUN uv pip install --python "$(python3 -c 'import sys; print(sys.executable)')" --no-cache-dir \
-      "vllm-omni==${VLLM_OMNI_VERSION}" "runpod>=1.7,<2" soundfile
+RUN PY="$(python3 -c 'import sys; print(sys.executable)')" \
+ && python3 -c "import torch, torchaudio, torchvision as tv; print(f'torch=={torch.__version__}'); print(f'torchaudio=={torchaudio.__version__}'); print(f'torchvision=={tv.__version__}')" > /tmp/torch-pins.txt \
+ && cat /tmp/torch-pins.txt \
+ && uv pip install --python "$PY" --no-cache-dir -c /tmp/torch-pins.txt \
+      --extra-index-url https://download.pytorch.org/whl/cu129 \
+      "vllm-omni==${VLLM_OMNI_VERSION}" "runpod>=1.7,<2" soundfile \
+ && python3 -c "import torch, torchaudio; assert torch.version.cuda.startswith('12.9'), torch.version.cuda; print('torch', torch.__version__, 'cuda', torch.version.cuda, 'torchaudio', torchaudio.__version__)"
 
 # Poids BAKES (~10 Go) : talker + codec embarque (bosonai/higgs-tts-3-4b), et l'encodeur du
 # codec pour le clonage (k2-fsa/OmniVoice, sous-dossier audio_tokenizer, ~0,8 Go).
