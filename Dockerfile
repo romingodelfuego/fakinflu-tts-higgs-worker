@@ -44,4 +44,7 @@ d('k2-fsa/OmniVoice', allow_patterns=['audio_tokenizer/*'])"
 COPY handler.py /app/handler.py
 COPY test_input.json /app/test_input.json
 
+# L'image vLLM a "vllm" pour ENTRYPOINT : sans cette remise a zero, CMD devient
+# "vllm python3 -u handler.py" -> "unrecognized arguments" (v1.0.2).
+ENTRYPOINT []
 CMD ["python3", "-u", "handler.py"]
