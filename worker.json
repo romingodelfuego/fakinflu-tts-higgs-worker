@@ -20,7 +20,7 @@
     "disk_gb": 40,
     "min_cuda": "12.9",
     "env": {},
-    "notes": "Image CUDA 12.9 : minCudaVersion 12.9 sur l'endpoint. vLLM-Omni reserve ~85 % de la VRAM (talker 60 % + codec 25 %) : 48 Go pour le premier test, 24 Go a essayer ensuite. Licence du modele : recherche/non commerciale + Creator Use Grant (crediter Boson AI's Higgs Audio)."
+    "notes": "Image CUDA 12.9 : minCudaVersion 12.9 sur l'endpoint (sinon le conteneur est refuse au demarrage, sans log). vLLM-Omni reserve ~85 % de la VRAM (talker 60 % + codec 25 %) : 48 Go pour le premier test, 24 Go a essayer ensuite. Licence du modele : recherche/non commerciale + Creator Use Grant (crediter Boson AI's Higgs Audio)."
   },
-  "version": "v1.0.0"
+  "version": "v1.0.1"
 }
